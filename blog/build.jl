@@ -1,5 +1,5 @@
 using Franklin
 
 function build()
-    Franklin.publish()    
+    Franklin.publish()
 end

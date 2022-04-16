@@ -3,11 +3,11 @@ name: Azure Static Web Apps CI/CD
 on:
   push:
     branches:
-      - master
+      - gh-pages
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
-      - master
+      - gh-pages
 
 jobs:
   build_and_deploy_job:
@@ -28,7 +28,7 @@ jobs:
           ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
           # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
           app_location: "/" # App source code path
-          output_location: "public" # Built app content directory - optional
+          output_location: "blog/__site" # Built app content directory - optional
           skip_app_build: true
           ###### End of Repository/Build Configurations ######
 
