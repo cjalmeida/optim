@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/default.min.css"> -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/base16/gruvbox-dark-soft.min.css" integrity="sha512-HPBwQX4LGot0Y5CAt5VSh2AMrOJPxx29dk/jakKDyNxSQ59IvDjmM/c5piyv077XRuZFsyjuYhci9fgSJIAilg==" crossorigin="anonymous" referrerpolicy="no-referrer" />  <link rel="stylesheet" href="/css/poole_lanyon.css">
+<link rel="stylesheet" href="/css/adjust.css">
+<link rel="stylesheet" href="/css/custom.css">
+<link rel="icon" href="/assets/favicon.png">
+ 
+    <title>CJ: Solving the Job Shop Scheduling Problem with Julia</title>
+    
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=PT+Serif&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox">
+
+<!-- Toggleable sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-item">
+    <p>A theme adapted from <a href="http://lanyon.getpoole.com/" target="_blank">Lanyon</a>.</p>
+  </div>
+  <nav class="sidebar-nav">
+    <a class="sidebar-nav-item " href="/">Articles</a>
+  </nav>
+  <div class="sidebar-item">
+    <p>&copy; Cloves Almeida.</p>
+  </div>
+</div>
+
+<!-- Wrap is the content to shift when toggling the sidebar. We wrap the
+content to avoid any CSS collisions with our real content. -->
+<div class="wrap">
+  <div class="masthead">
+    <div class="container">
+      <h3 class="masthead-title">
+        <a href="/" title="Home">cjalmeida</a>
+        <small>xyz</small>
+      </h3>
+    </div>
+  </div>
+
+  <div class="container content">
+
+    <!-- Content appended here -->
+  </body>
+</html>
+<div class="franklin-content"><h1 id="solving_the_job_shop_scheduling_problem_with_julia"><a href="#solving_the_job_shop_scheduling_problem_with_julia" class="header-anchor">Solving the Job Shop Scheduling Problem with Julia</a></h1>
+<p>This is the first in a series of posts exploring practical solutions to combinatorial  optimization problems. In my <code>&#36;dayjob</code> at BCG Gamma, the data science arm of <a href="https://bcg.com">BCG</a>,  we deal with a lot of problems that can be  classified as or reduced to  <a href="https://en.wikipedia.org/wiki/Combinatorial_optimization">combinatorial optimization</a> &#40;CO&#41; problems. These are <strong>optimization</strong> problems that can be solved by picking a solution from a discrete and finite &#40;even if huge&#41; set of options.</p>
+<p>Expressing and solving such optimization problems with &quot;industrial&quot; application is the object of study  of <a href="https://en.wikipedia.org/wiki/Operations_research">Operations Research &#40;OR&#41;</a> discipline  since the dawn of computing post World War II. Techniques to solving such problems have a number  of real world applications. Improving airline schedules, reallocating aircrafts during airport disruptions,  improving yields in steelmaking operations, improving delivery routes of fuel trucks  and finding optimal prices during markdown season in retail are some applications I&#39;ve been personally involved.</p>
+<p>This series of posts are my take on understanding and exploring this space, in particular using <a href="https://julialang.org/">Julia</a> a modern programming language designed for high performance scientific computing. Also note that I&#39;m an engineer, not an OR expert, so I&#39;ll be more focused on the practical and engineering aspect of the problems. All code should be available in  my <a href="https://github.com/cjalmeida/optim">personal GitHub repo</a>.</p>
+<p>But before we dive into stating problems and finding solutions, let&#39;s talk a bit  why I picked Julia for this series. You can <a href="#the_problem">skip</a> the next section if you&#39;re already sold on Julia.</p>
+<h2 id="why_julia"><a href="#why_julia" class="header-anchor">Why Julia?</a></h2>
+<p>Nowadays, Python is arguably the most popular language for scientific computing,  including solving optimization problems. Indeed, at BGC Gamma we use Python in most of our projects. So, again, <em>Why Julia?</em> and <em>Why Julia instead of Python?</em></p>
+<p>Well, most importantly, because I want to :&#41;. That said, Julia is designed to solve a problem that hit me hard a couple of times: the <em>two languages problem</em>. Python is a very productive language but it&#39;s fundamentally slow. Whenever we need to make a  Python algorithm fast, we need to rely on <em>native extensions</em> written in C/C&#43;&#43;. This  is usually not a problem as the ecosystem is huge, and a practicing data scientist or  ML engineer can find pre-packaged libraries for most of what they&#39;d like to do.</p>
+<p>But whenever you want to do something that the library developers did not  anticipate you&#39;re in trouble. In one case, our algorithm needed to quickly build and solve many <em>shortest-path</em>-like problems. Existing libraries would not fit the bill,  and the custom Python code would be at least 50x slower than the equivalent C&#43;&#43; code.  Writing such <em>native extensions</em> is far from easy and not a skill usually not found in  most data scientists. This ends up creating the commonly seen two tiers of  practitioners: one responsible for writing &quot;experimental&quot; research-grade code, and  another responsible with translating this code into production.</p>
+<p>Julia, however, was designed to solve this issue. It&#39;s a  <a href="https://en.wikipedia.org/wiki/Dynamic_programming_language">dynamic language</a> with Python inspired syntax, thus easy to prototype and experiment. It supports  <a href="https://github.com/JuliaLang/IJulia.jl">Jupyter Notebooks</a> and has it&#39;s own <em>reactive</em> notebook system in <a href="https://github.com/fonsp/Pluto.jl">Pluto.jl</a>. But can be as fast as C/C&#43;&#43; with careful  &#40;but idiomatic&#41; coding. The ecosystem is far from that of Python, but for the nice of scientific computing, it provides libraries that are  considered state-of-the-art in their niche, eg. <a href="https://jump.dev/JuMP.jl/stable/">JuMP</a> for mathematical programming and  <a href="https://diffeq.sciml.ai/dev/index.html">DifferentialEquations.jl</a> for solving many kinds of differential equations. Also, interoperability is great, so you can bring your Python/C&#43;&#43; libraries along if you want.</p>
+<p>For those reasons, I believe that for this series and for some projects, Julia can make my life easier compared to Python.</p>
+<h2 id="the_problem"><a href="#the_problem" class="header-anchor">The problem</a></h2>
+<p>We&#39;ll use the standard version of the <a href="https://en.wikipedia.org/wiki/Job-shop_scheduling">Job Shop Scheduling Problem</a>  as our first example to guide us through. This problem can be found in numerous settings, ranging from actual manufacturing to distributed computing. Google OR-Tools package has  a <a href="https://developers.google.com/optimization/scheduling/job_shop">very nice description</a> of the problem:</p>
+<div class="quote"><p>Each job consists of a sequence of tasks, which must be performed in a given order, and  each task must be processed on a specific machine. For example, the job could be the  manufacture of a single consumer item, such as an automobile. The problem is to  schedule the tasks on the machines so as to minimize the length of the schedule—the  time it takes for all the jobs to be completed.</p>
+<p>There are several constraints for the job shop problem:</p>
+<ul>
+<li><p>No task for a job can be started until the previous task for that job is completed.</p>
+</li>
+<li><p>A machine can only work on one task at a time.</p>
+</li>
+<li><p>A task, once started, must run to completion.</p>
+</li>
+</ul></div>
+<p>We&#39;ll begin by creating a very naive solution to this problem, one that is feasible but far from optimal. This will allow us to introduce the Julia machinery and create some nice visualization.</p>
+<h2 id="a_naive_solution"><a href="#a_naive_solution" class="header-anchor">A naive solution</a></h2>
+<div class="quote">Note this section is very code heavy. The source is under <code>code/jssp/naive.jl</code></div>
+<pre><code class="language-julia"># Script compatible with Literate.jl &#43; Franklin.jl</code></pre>
+<p>First, let&#39;s create the data structures for the problem and add some aliases and data structures to make the code more legible.</p>
+<p>We&#39;ll also add data structures and aliases for the solution. We need to assign <code>&#40;job, op&#41;</code> to <code>machine</code> at a given start time <code>t_start</code>. We added <code>t_end</code> for convenience.</p>
+<pre><code class="language-julia">const Machine &#61; Int8
+const Duration &#61; Int32
+const Instant &#61; Int32
+const OpId &#61; Int16
+const JobId &#61; Int16
+
+# An operation within a job. 
+# Op id&#39;s are inferred from their index in the job &quot;ops&quot; vector.
+struct Op
+    machine::Machine
+    duration::Duration
+end
+
+# An operation within a problem. 
+# Job id&#39;s are inferred from their index in the problem vector.
+struct Job
+    ops::Vector&#123;Op&#125;
+end
+
+struct Assignment
+    job::Int
+    op::OpId
+    machine::Machine
+    t_start::Instant
+    t_end::Instant
+end
+
+const JSSProblem &#61; Vector&#123;Job&#125;
+const Plan &#61; Vector&#123;Assignment&#125;
+
+# Base type for solving algorithms
+abstract type SolveAlg end</code></pre>
+
+<p>Let&#39;s begin with the same problem presented in <a href="https://developers.google.com/optimization/scheduling/job_shop#example">OR-Tools tutorial</a>. In this case, a &quot;problem&quot; consist of a list &#40;<code>Vector</code>&#41; of job instances. Each job containing list of <code>Operation&#40;machine, duration&#41;</code>.</p>
+<pre><code class="language-julia">function get_problem&#40;::Val&#123;:ortools_example&#125;&#41;
+    return &#91;
+        Job&#40;&#91;Op&#40;1, 3&#41;, Op&#40;2, 2&#41;, Op&#40;3, 2&#41;&#93;&#41;,
+        Job&#40;&#91;Op&#40;1, 2&#41;, Op&#40;3, 1&#41;, Op&#40;2, 4&#41;&#93;&#41;,
+        Job&#40;&#91;Op&#40;2, 4&#41;, Op&#40;3, 3&#41;&#93;&#41;
+    &#93;
+end
+
+# This is a shortcut to avoid having to wrap symbols in Val
+get_problem&#40;x::Symbol&#41; &#61; get_problem&#40;Val&#40;x&#41;&#41;</code></pre>
+<p>We&#39;ll start by coding a feasible but very naive solution to get more intuition for the problem. The solution will simple iterate the job list and assign operations in sequence, making sure we don&#39;t assign overlapping operations to machines.</p>
+<p>To leverage Julia&#39;s multiple dispatch, we&#39;ll create an empty <code>struct</code> named <code>NaiveAlg</code> solution.</p>
+<pre><code class="language-julia">using DataStructures  # provides DefaultDict
+
+struct NaiveAlg &lt;: SolveAlg end
+
+function solve&#40;::NaiveAlg, jobs&#41;
+    plan &#61; Vector&#123;Assignment&#125;&#40;&#41;
+
+    # keep track of when machines are &quot;free&quot;
+    free_at &#61; DefaultDict&#123;Machine,Instant&#125;&#40;0&#41;
+
+    for &#40;jid, j&#41; in enumerate&#40;jobs&#41;
+        tend&#61;0
+        for &#40;opid, op&#41; in enumerate&#40;j.ops&#41;
+            tstart &#61; max&#40;tend, free_at&#91;op.machine&#93;&#41;
+            tend &#61; tstart &#43; op.duration
+            free_at&#91;op.machine&#93; &#61; tend  # update free time of this machine
+            push&#33;&#40;plan, Assignment&#40;jid, opid, op.machine, tstart, tend&#41;&#41;
+        end
+    end
+
+    return plan
+end</code></pre>
+<p>A good way to visualize schedules is via &quot;Gantt&quot; charts. Let&#39;s create a plotting function using <code>DataFrames</code> the <code>Makie</code> plotting package. And <code>Query.jl</code> to make our code more expressive using functional operators.</p>
+<pre><code class="language-julia">using CairoMakie
+using DataFrames
+using Query
+
+num_machines&#40;plan&#41; &#61; plan |&gt; @map&#40;_.machine&#41; |&gt; @unique&#40;&#41; |&gt; @count&#40;&#41;
+
+makespan&#40;plan&#41; &#61; plan |&gt; @map&#40;_.t_end&#41; |&gt; maximum
+
+function plot&#40;plan::Plan&#41;
+    ## A &#96;Vector&#123;Assignment&#125;&#96; can be easily converted to a &#96;DataFrame&#96;
+    df &#61; DataFrame&#40;plan&#41;
+
+    ## Like matplotlib, create a color pallet, and figure and axis objects for layouting
+    colors &#61; cgrad&#40;:tab10&#41;
+    fig &#61; Figure&#40;resolution&#61;&#40;700, 200&#41;&#41;
+    ax &#61; Axis&#40;
+        fig&#91;1, 1&#93;,
+        ylabel&#61;&quot;Machine&quot;,
+        xlabel&#61;&quot;Time&quot;,
+        yticks&#61;LinearTicks&#40;num_machines&#40;plan&#41;&#41;
+    &#41;
+
+    ## Let&#39;s add a barplot showing the machine assignments. The &#96;&#40;x, y&#41;&#96; axis seem 
+    ## because we want to show a horizontal chart inverted.
+    barplot&#33;&#40;
+        df.machine,             # actual y-axis
+        df.t_end,               # x &#40;end&#41;
+        fillto&#61;df.t_start,      # x &#40;start&#41;
+        direction&#61;:x,
+        color&#61;colors&#91;df.job&#93;,
+        width&#61;0.75,
+    &#41;
+
+    ## Add labels to the bars to help track jobs
+    labels &#61; &#91;&quot;&#36;j.&#36;o&quot; for &#40;j, o&#41; in zip&#40;df.job, df.op&#41;&#93;
+    positions&#61;Point2f.&#40;&#40;df.t_start .&#43; 0.1&#41;, df.machine&#41;
+    text&#33;&#40;
+        labels,
+        position&#61;positions,
+        textsize&#61;11,
+        color&#61;&quot;#ffffff&quot;,
+        align&#61;&#40;:left, :center&#41;
+    &#41;
+    return fig
+end</code></pre>
+
+<p>Putting everything together we can solve and plot our solution.</p>
+<pre><code class="language-julia">function run_naive&#40;&#41;
+    jobs &#61; get_problem&#40;:ortools_example&#41;
+    plan &#61; solve&#40;NaiveAlg&#40;&#41;, jobs&#41;
+    span &#61; makespan&#40;plan&#41;
+    println&#40;&quot;Solution makespan: &#36;&#40;span&#41;&quot;&#41;
+end</code></pre>
+
+<pre><code class="language-julia">run_naive&#40;&#41;</code></pre>
+<h1 id="img_srcassetspostsjssp1codeoutputnaivepng_altnaive"><a href="#img_srcassetspostsjssp1codeoutputnaivepng_altnaive" class="header-anchor"><img src="/assets/posts/jssp1/code\output\naive.png" alt="Naive"></a></h1>
+<p>The optimal makespan for this problem is <code>11</code>. As you can see from the above result we can do much better.</p>
+<h2 id="a_brief_discussion_of_optimization_problems_and_solution_algorithms"><a href="#a_brief_discussion_of_optimization_problems_and_solution_algorithms" class="header-anchor">A brief discussion of optimization problems and solution algorithms</a></h2>
+<p>When trying to chart a solution to a CO problem, it&#39;s very useful to try to understand <a href="https://en.wikipedia.org/wiki/Computational_complexity">how complex the problem is in computational terms</a>. If you&#39;re lucky, you will be able to apply one of many &quot;exact algorithms&quot; that are able to solve the problem in <a href="https://en.wikipedia.org/wiki/Time_complexity#Polynomial_time">polynomial time &#40;<strong>P</strong>&#41;</a>. In layman terms, this means such problems are &quot;tractable&quot;, ie. even large instances  can be solved to optimality using a resonable amount of computing power. </p>
+<p>A lot of interesting problems, however, fall into the so-called <a href="https://en.wikipedia.org/wiki/NP_&#40;complexity&#41;"><strong>NP</strong> class</a>  where no tractable algorithm was found and <a href="https://en.wikipedia.org/wiki/P_versus_NP_problem">likely never will</a>.  This means that, to exactly solve large instances of such problems, you need huge  amounts of computing power. Our job shop scheduling in one example of an <em>NP problem</em>.  But we can still solve to optimality such problems if they&#39;re not too large. Increases  in computing power and clever techniques have been pushing the limit of what&#39;s &quot;solvable&quot;,  and nowadays at BCG Gamma we are able to solve quite real-world instances that are  quite large.</p>
+<p>However, cases it&#39;s not rare to find cases when finding an exact optimal solution is  not feasible. In such situations, one can use so-called  <a href="https://en.wikipedia.org/wiki/Heuristic_&#40;computer_science&#41;"><strong>heuristics</strong> algorithms</a>,  that try to find solutions that &#40;may be&#41; close to the optimal. Usually such algorithms  are much faster, but don&#39;t give you &quot;hard&quot; guarantees on how far the solution is from  the optimal. Yet, they may be able to produce good solutions that work in practice.</p>
+<p>We&#39;ll cover <em>heuristic approaches</em> later in the series. In the <a href="/posts/jssp2/">part 2 of this post</a>,  we&#39;ll use <a href="https://www.gurobi.com/resource/mip-basics/">Mixed-Integer Linear Programming &#40;MIP&#41;</a>,  an <em>exact algorithm</em>, to solve our Job Shop example to optimality.</p>
+<p></p>
+<div class="page-foot">
+    <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> Cloves Almeida. Last modified: April 16, 2022.
+    Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a> and the <a href="https://julialang.org">Julia programming language</a>.
+</div>
+</div><!-- CONTENT ENDS HERE -->
+      </div>  <!-- div: content container -->
+    </div> <!-- wrap -->
+    
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js" integrity="sha512-yUUc0qWm2rhM7X0EFe82LNnv2moqArj5nro/w1bi05A09hRVeIZbN6jlMoyu0+4I/Bu4Ck/85JQIU82T82M28w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="/libs/highlight/julia.highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.3/gsap.min.js"></script>
+<script>
+hljs.configure({tabReplace: '    '});
+hljs.highlightAll();
+hljs.addPlugin({
+    'after:highlightElement': ({el, result}) => {
+        el.dataset.height = el.offsetHeight;
+        var hide = el.parentElement.previousElementSibling;
+        if (hide.classList.contains("hide-next")) {
+            el.classList.add("hidden")
+            el.style.height = "0"
+        }
+    }
+})
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll(".hide-next").forEach((el) => {
+        initHideCodeBlock(el)
+    })
+}, false);
+
+function toggleCodeBlock(el) {
+    if (el.classList.contains('hidden')) {
+        el.classList.remove('hidden')
+        gsap.to(el, {
+            duration: 0.5,
+            height: el.dataset.height
+        })
+    } else {
+        gsap.to(el, {
+            duration: 0.5,
+            height: 0,
+            onComplete: () => {el.classList.add('hidden')}
+        })
+    }
+    return false
+}
+
+/**
+ * @param {HTMLDivElement} el 
+ */
+function initHideCodeBlock(el) {
+    el.innerHTML = "<a href='#' class='hide-label'>[+] Click to show code.</a>"
+    var code = el.nextElementSibling.firstElementChild
+    el.onclick = function() {toggleCodeBlock(code); return false;}
+}
+</script>
+
+    
+    <label for="sidebar-checkbox" class="sidebar-toggle"></label>
+    <script src="/libs/custom.js"></script>
+  </body>
+</html>

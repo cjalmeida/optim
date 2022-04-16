@@ -1,0 +1,44 @@
+html {
+    /* font-family: 'Libre Baskerville', serif; */
+}
+
+.quote {
+    margin-left: 10px;
+    margin-bottom: 10px;
+    font-style: italic;
+    font-size: smaller;
+    border: solid;
+    border-width: 0 0 0 2px;
+    padding-left: 10px;
+}
+
+/* .hide-next {} */
+
+pre code.hljs {
+    border-radius: 0.5rem;
+}
+
+
+code {
+    overflow-y: hidden !important;
+}
+
+code.hidden {
+    display: none !important;
+}
+
+code.code-output {
+    color: lightgray;
+}
+
+code.code-output span {
+    color: lightgray;
+}
+
+.franklin-content img {
+    max-width: 100%;
+}
+
+.page-foot {
+    font-size: small;
+}
