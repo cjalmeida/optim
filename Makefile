@@ -5,7 +5,7 @@ setup-julia:
 	tar zxf julia.tgz
 
 html: setup-julia
-	export PATH="$$PWD/julia-1.7.1/bin:$$PATH" && \
+	export PATH="$$PWD/julia-1.7.2/bin:$$PATH" && \
 	cd blog && \
 	julia build.jl
 
