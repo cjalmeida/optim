@@ -1,17 +1,10 @@
 
-const Machine = Int8
-const Duration = Int64
-const Instant = Int64
-const OpId = Int16
-const JobId = Int16
-
 struct Op
     machine::Machine
     duration::Duration
 end
 
 struct Job
-    id::Int
     ops::Vector{Op}
 end
 

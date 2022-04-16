@@ -1,0 +1,49 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js" integrity="sha512-yUUc0qWm2rhM7X0EFe82LNnv2moqArj5nro/w1bi05A09hRVeIZbN6jlMoyu0+4I/Bu4Ck/85JQIU82T82M28w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="/libs/highlight/julia.highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.3/gsap.min.js"></script>
+<script>
+hljs.configure({tabReplace: '    '});
+hljs.highlightAll();
+hljs.addPlugin({
+    'after:highlightElement': ({el, result}) => {
+        el.dataset.height = el.offsetHeight;
+        var hide = el.parentElement.previousElementSibling;
+        if (hide.classList.contains("hide-next")) {
+            el.classList.add("hidden")
+            el.style.height = "0"
+        }
+    }
+})
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll(".hide-next").forEach((el) => {
+        initHideCodeBlock(el)
+    })
+}, false);
+
+function toggleCodeBlock(el) {
+    if (el.classList.contains('hidden')) {
+        el.classList.remove('hidden')
+        gsap.to(el, {
+            duration: 0.5,
+            height: el.dataset.height
+        })
+    } else {
+        gsap.to(el, {
+            duration: 0.5,
+            height: 0,
+            onComplete: () => {el.classList.add('hidden')}
+        })
+    }
+    return false
+}
+
+/**
+ * @param {HTMLDivElement} el 
+ */
+function initHideCodeBlock(el) {
+    el.innerHTML = "<a href='#' class='hide-label'>[+] Click to show code.</a>"
+    var code = el.nextElementSibling.firstElementChild
+    el.onclick = function() {toggleCodeBlock(code); return false;}
+}
+</script>
