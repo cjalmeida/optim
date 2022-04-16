@@ -1,0 +1,4 @@
+Sitemap: https://cjalmeida.xyz/sitemap.xml
+
+User-agent: *
+Disallow:
