@@ -1,7 +1,7 @@
 # Solving the Job Shop Scheduling Problem with Julia
 
 This is the first in a series of posts exploring practical solutions to combinatorial 
-optimization problems. In my `$dayjob` at BCG Gamma, the data science arm of [BCG](bcg.com) , 
+optimization problems. In my `$dayjob` at BCG Gamma, the data science arm of [BCG](https://bcg.com), 
 we deal with a lot of problems that can be  classified as or reduced to 
 [combinatorial optimization](https://en.wikipedia.org/wiki/Combinatorial_optimization) (CO)
 problems. These are **optimization** problems that can be solved by picking a solution
