@@ -1,4 +1,6 @@
-# Solving the Job Shop Scheduling Problem with Julia
+@def date = "2022-04-16T10:00:00"
+
+# Solving the Job Shop Scheduling Problem with Julia (part 1)
 
 This is the first in a series of posts exploring practical solutions to combinatorial 
 optimization problems. In my `$dayjob` at BCG Gamma, the data science arm of [BCG](https://bcg.com), 
@@ -95,10 +97,12 @@ Note this section is very code heavy. The source is under `code/jssp/naive.jl`
 \literate{/code/jssp/naive.jl}
 
 ```julia:./code/naive
-run_naive()
+span = run_naive()
+println("Solution makespan: $(span)")
 ```
 
-# \figalt{Naive}{naive.png}
+\figalt{Naive}{naive.png}
+\output{./code/naive}
 
 The optimal makespan for this problem is `11`. As you can see from the above result
 we can do much better.

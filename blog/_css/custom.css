@@ -2,6 +2,15 @@ html {
     /* font-family: 'Libre Baskerville', serif; */
 }
 
+h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.page-foot {
+    margin-top: 3rem;
+}
+
 .quote {
     margin-left: 10px;
     margin-bottom: 10px;
@@ -15,7 +24,7 @@ html {
 /* .hide-next {} */
 
 pre code.hljs {
-    border-radius: 0.5rem;
+    border-radius: 0.3rem;
 }
 
 
