@@ -16,6 +16,7 @@ generate_rss = true
 website_title = "cjalmeida.xyz"
 website_descr = "Cloves's personal blog site"
 website_url   = "https://cjalmeida.xyz/"
+blog_repo = https://github.com/cjalmeida/optim/tree/master/blog
 +++
 
 <!--

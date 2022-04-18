@@ -1,35 +1,48 @@
+## Script compatible with Literate.jl + Franklin.jl
+include(joinpath(pwd(), "utils.jl")) #hide
+
+# Let's start by loading the same data structures, example problem and plotting functions we
+# created for the part 1. The `include_code` function, defined in `utils.jl` ensures we can use 
+# `include` pointing to the correct code path.
+
+include_code("jssp/data.jl")
+include_code("jssp/problem_ort.jl")
+include_code("jssp/plot.jl")
+
+## We can use `JuMP` and `Cbc` as usual.
+
 using JuMP
 using Cbc
 
-struct ManneMIPAlg <: SolveAlg end
-const Jobs = Vector{Job}
+# Now let's add a couple of helper functions to transform our original input 
+# `jobs::Vector{Job}` into the parameters we expect for the formulation
 
-
-machines(jobs::Jobs) = jobs |> @map(_.ops) |> Iterators.flatten |> @map(_.machine) |> @unique() |> collect
+machines(jobs::Vector{Job}) = jobs |> @map(_.ops) |> Iterators.flatten |> @map(_.machine) |> @unique() |> collect
 
 """
-Operations as `O[j=job, h=1:m] -> i` representing the order `h` of execution 
+Return the 2D-array `σ[j=job, h=1:m] -> i` representing the order `h` of execution 
 for job `j` at given machine `i`. 
 
-If a job is not assigned to any machine, we assign it to machine `1` (expecting 0.0 duration).
+If a job is not assigned to any machine, we assign it to machine `1` (expecting 0 duration).
 """
 function operations(jobs::Jobs)
     n = length(jobs)
     m = length(machines(jobs))
-    O = ones(Int, (m, n))
+    σ = ones(Int, (m, n))
     for j in 1:n
         for (h, op) in enumerate(jobs[j].ops)
-            O[j, h] = op.machine
+            σ[j, h] = op.machine
         end
     end
-    return O
+    return σ
 end
 
-"""Return a lookup matrix of `[i=machine, j=job] -> h` where h is the op sequence number (id)."""
+"""Return a lookup matrix of `S[i=machine, j=job] -> h` where h is the op sequence 
+number (id)."""
 function job_machine_to_op(jobs::Jobs)
     n = length(jobs)
     m = length(machines(jobs))
-    lookup = zeros(Int, (m, n))  # p_(i,j)
+    lookup = zeros(Int, (m, n))
     for j in 1:n
         for (h, op) in enumerate(jobs[j].ops)
             lookup[op.machine, j] = h
@@ -38,7 +51,7 @@ function job_machine_to_op(jobs::Jobs)
     return lookup
 end
 
-"""The processing time, as a `p[i=machine, j=job] -> time` matrix"""
+"""The processing time, as a `p[i=machine, j=job] -> t=time` matrix"""
 function processing_time(jobs::Vector{Job})
     n = length(jobs)
     m = length(machines(jobs))
@@ -51,6 +64,8 @@ function processing_time(jobs::Vector{Job})
     end
     return p
 end
+
+struct ManneMIPAlg <: SolveAlg end
 
 """
 Solves the job shop scheduling problem using a MIP approach.

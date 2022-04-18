@@ -3,7 +3,7 @@
 # Solving the Job Shop Scheduling Problem with Julia (part 1)
 
 This is the first in a series of posts exploring practical solutions to combinatorial 
-optimization problems. In my `$dayjob` at BCG Gamma, the data science arm of [BCG](https://bcg.com), 
+optimization problems. In my `$dayjob` at BCG GAMMA, the data science arm of [BCG](https://bcg.com), 
 we deal with a lot of problems that can be  classified as or reduced to 
 [combinatorial optimization](https://en.wikipedia.org/wiki/Combinatorial_optimization) (CO)
 problems. These are **optimization** problems that can be solved by picking a solution
@@ -30,7 +30,7 @@ sold on Julia.
 ## Why Julia?
 
 Nowadays, Python is arguably the most popular language for scientific computing, 
-including solving optimization problems. Indeed, at BGC Gamma we use Python in most
+including solving optimization problems. Indeed, at BGC GAMMA we use Python in most
 of our projects. So, again, *Why Julia?* and *Why Julia instead of Python?*
 
 Well, most importantly, because I want to :). That said, Julia is designed to solve
@@ -91,7 +91,8 @@ some nice visualization.
 ## A naive solution
 
 @@quote
-Note this section is very code heavy. The source is under `code/jssp/naive.jl`
+Note this section is very code heavy. The source is available at blog repo in
+[`blog/code/jssp/naive.jl`]({{blog_repo}}/code/jssp/naive.jl)
 @@
 
 \literate{/code/jssp/naive.jl}
@@ -122,7 +123,7 @@ This means that, to exactly solve large instances of such problems, you need hug
 amounts of computing power. Our job shop scheduling in one example of an *NP problem*. 
 But we can still solve to optimality such problems if they're not too large. Increases 
 in computing power and clever techniques have been pushing the limit of what's "solvable", 
-and nowadays at BCG Gamma we are able to solve quite real-world instances that are 
+and nowadays at BCG GAMMA we are able to solve quite real-world instances that are 
 quite large.
 
 However, cases it's not rare to find cases when finding an exact optimal solution is 
