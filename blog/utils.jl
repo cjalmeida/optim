@@ -1,5 +1,6 @@
 using Query
 using Franklin
+using Dates
 
 function include_code(fname)
   include(joinpath(pwd(), "code", fname))
@@ -29,7 +30,7 @@ function hfun_allposts()
     @map((post_params(_)..., _)) |>
     collect
   
-  sort!(posts, rev=true)
+  sort!(posts, rev=false)
   
   names = posts |> 
     @map(last(splitpath(last(_)))) |>

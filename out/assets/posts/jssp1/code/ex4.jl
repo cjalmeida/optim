@@ -13,7 +13,7 @@ function solve(::NaiveAlg, jobs)
         tend=0
         for (opid, op) in enumerate(j.ops)
             tstart = max(tend, free_at[op.machine])
-            tend = tstart + op.duration
+            tend = tstart + op.process_time
             free_at[op.machine] = tend  # update free time of this machine
             push!(plan, Assignment(jid, opid, op.machine, tstart, tend))
         end

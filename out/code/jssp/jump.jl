@@ -11,7 +11,7 @@ machines(jobs::Jobs) = jobs |> @map(_.ops) |> Iterators.flatten |> @map(_.machin
 Operations as `O[j=job, h=1:m] -> i` representing the order `h` of execution 
 for job `j` at given machine `i`. 
 
-If a job is not assigned to any machine, we assign it to machine `1` (expecting 0.0 duration).
+If a job is not assigned to any machine, we assign it to machine `1` (expecting 0.0 process_time).
 """
 function operations(jobs::Jobs)
     n = length(jobs)
@@ -46,7 +46,7 @@ function processing_time(jobs::Vector{Job})
     for j in 1:n
         for op in jobs[j].ops
             i = op.machine
-            p[i, j] = op.duration
+            p[i, j] = op.process_time
         end
     end
     return p

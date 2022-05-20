@@ -8,7 +8,7 @@ const JobId = Int16
 # Op id's are inferred from their index in the job "ops" vector.
 struct Op
     machine::Machine
-    duration::Duration
+    process_time::Duration
 end
 
 # An operation within a problem. 
@@ -18,7 +18,7 @@ struct Job
 end
 
 struct Assignment
-    job::Int
+    job::JobId
     op::OpId
     machine::Machine
     t_start::Instant

@@ -5,3 +5,6 @@ function get_problem(::Val{:ortools_example})
         Job([Op(2, 4), Op(3, 3)])
     ]
 end
+
+## This is a shortcut to avoid having to wrap symbols in `Val`
+get_problem(x::Symbol) = get_problem(Val(x))

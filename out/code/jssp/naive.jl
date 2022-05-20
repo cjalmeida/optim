@@ -13,7 +13,7 @@ include_code("jssp/data.jl") #hide
 
 # Let's begin with the same problem presented in [OR-Tools tutorial](https://developers.google.com/optimization/scheduling/job_shop#example). 
 # In this case, a "problem" consist of a list (`Vector`) of job instances. Each job 
-# containing list of `Operation(machine, duration)`. 
+# containing list of `Operation(machine, process_time)`. 
 
 function get_problem(::Val{:ortools_example})
     return [
@@ -47,7 +47,7 @@ function solve(::NaiveAlg, jobs)
         tend=0
         for (opid, op) in enumerate(j.ops)
             tstart = max(tend, free_at[op.machine])
-            tend = tstart + op.duration
+            tend = tstart + op.process_time
             free_at[op.machine] = tend  # update free time of this machine
             push!(plan, Assignment(jid, opid, op.machine, tstart, tend))
         end

@@ -1,4 +1,4 @@
-## Script compatible with Literate.jl + Franklin.jl
+## Script compatible with Literate.jl + Franklin.jl #hide
 include(joinpath(pwd(), "utils.jl")) #hide
 
 # First, let's create the data structures for the problem and add some aliases and data structures
@@ -13,14 +13,10 @@ include_code("jssp/data.jl") #hide
 
 # Let's begin with the same problem presented in [OR-Tools tutorial](https://developers.google.com/optimization/scheduling/job_shop#example). 
 # In this case, a "problem" consist of a list (`Vector`) of job instances. Each job 
-# containing list of `Operation(machine, duration)`. 
+# containing list of `Operation(machine, process_time)`. 
 
 # \input{julia}{/code/jssp/problem_ort.jl}
 include_code("jssp/problem_ort.jl") #hide
-
-
-## This is a shortcut to avoid having to wrap symbols in Val
-get_problem(x::Symbol) = get_problem(Val(x))
 
 # We'll start by coding a feasible but very naive solution to get more intuition for the problem.
 # The solution will simple iterate the job list and assign operations in sequence, 
@@ -43,7 +39,7 @@ function solve(::NaiveAlg, jobs)
         tend=0
         for (opid, op) in enumerate(j.ops)
             tstart = max(tend, free_at[op.machine])
-            tend = tstart + op.duration
+            tend = tstart + op.process_time
             free_at[op.machine] = tend  # update free time of this machine
             push!(plan, Assignment(jid, opid, op.machine, tstart, tend))
         end
