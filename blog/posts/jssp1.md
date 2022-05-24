@@ -1,8 +1,8 @@
 @def date = "2022-04-16T10:00:00"
 
-# Solving the Job Shop Scheduling Problem with Julia (part 1)
+# Discrete optimization problems with Julia. Part 1: Introduction
 
-This is the first in a series of posts exploring practical solutions to combinatorial optimization problems. If you just landed here, the [home page] explains why those problems matter.
+This is the first in a series of posts exploring practical solutions to discrete (combinatorial) optimization problems. If you just landed here, the [home page] explains why those problems matter.
 
 But before we dive into stating problems and finding solutions, let's talk a bit why I picked Julia for this series. You can [skip](#the_problem) the next section if you're already sold on Julia.
 

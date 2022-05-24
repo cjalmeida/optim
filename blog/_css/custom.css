@@ -51,3 +51,11 @@ code.code-output span {
 .page-foot {
     font-size: small;
 }
+
+.fndef {
+    font-size: small;
+}
+
+sup {
+    font-size: x-small;
+}

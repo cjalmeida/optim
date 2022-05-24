@@ -46,15 +46,19 @@ function run_benchmark1()
     println("\nBenchmark done!")
 end
 
-# ```julia:./code/bench1
-# run_benchmark1()
-# ```
-#
-# \textoutput{./code/jump1}
-#
+md"""
+```julia:./code/bench1
+run_benchmark1()
+```
+\output{./code/bench1}
+"""
+
 # We can see that the last `100j x 10m` problem took way more time than our `50j x 5m`
 # instance despite being only 4x bigger! Let's try solving the same instance using 
-# different solvers
+# different solvers. We'll use SCIP, a solver that's free for non-commercial uses. I 
+# have access to a Gurobi license so I'll also try it. Note that the code for HiGHS, 
+# another open-source solver, the is commented out as it was much slower (~19s) compared 
+# to other solvers.
 
 include_code("jssp/solvers.jl")
 
@@ -62,16 +66,33 @@ function run_benchmark2()
     ort_jobs = get_problem(:ortools_example)
     spec = JSSProblemSpec(100, 10, 0:5, seed)
     jobs = get_problem(spec)
-    
+
     println("\nA random 100j x 10m problem using SCIP")
     alg = ManneMIPAlg(:scip)
     solve(alg, ort_jobs) # warmup
     @time solve(alg, jobs)
+    
+    ### Commenting out HiGHS as it's very bad at this problem instance.
+    ## println("\nA random 100j x 10m problem using HiGHS")
+    ## alg = ManneMIPAlg(:highs)
+    ## solve(alg, ort_jobs) # warmup
+    ## @time solve(alg, jobs)
 
-    println("\nA random 100j x 10m problem using Gurobi")
-    alg = ManneMIPAlg(:gurobi)
-    solve(alg, ort_jobs) # warmup
-    @time solve(alg, jobs)
-
-
+    try
+        println("\nA random 100j x 10m problem using Gurobi")
+        alg = ManneMIPAlg(:gurobi)
+        solve(alg, ort_jobs) # warmup
+        @time solve(alg, jobs)
+    catch e
+        @show e
+        println("Could not run benchmark on Gurobi")
+    end
 end
+
+md"""
+```julia:./code/bench2
+run_benchmark2()
+```
+
+\output{./code/bench2}
+"""

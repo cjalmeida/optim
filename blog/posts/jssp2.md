@@ -1,6 +1,6 @@
 @def date = "2022-04-16T11:00:00"
 
-# Solving the Job Shop Scheduling Problem with Julia (part 2)
+# Discrete optimization problems with Julia. Part 2: Mixed Integer Linear Programming
 
 In the [previous post](/posts/jssp1/) we introduced the job shop scheduling problem (JSSP) and built some infrastructure for us to visualize solutions. If you haven't read it, I recommend you do it first.Our naive solution to the example was quite poor. In this post we're going to use a technique called [Mixed Integer Linear Programming (MILP)][milp] to solve this particular instance to optimality. Beware, this is where things start to get math-heavy!
 
