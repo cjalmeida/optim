@@ -44,5 +44,7 @@ end
 
 ## Configure HiGHS solver
 function get_solver(::ManneMIPAlg, ::Val{:highs})
-    return optimizer_with_attributes(HiGHS.Optimizer, "log_to_console" => false)
+    return optimizer_with_attributes(HiGHS.Optimizer, 
+    # "log_to_console" => false
+    )
 end

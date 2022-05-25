@@ -28,15 +28,26 @@ machines(jobs::Vector{Job}) = jobs |>
 Return the 2D-array `σ[j=job, h=1:m] -> i` representing the order `h` of execution 
 for job `j` at given machine `i`. 
 
-If a job is not assigned to any machine, assign to machine `1` (expect 0 process_time).
+If a job is not assigned to any machine, assign to a non-used machine (expect 0 
+process_time).
 """
 function operations(jobs::Vector{Job})
     n = length(jobs)
-    m = length(machines(jobs))
-    σ = ones(Int, (n, m))
+    M = machines(jobs)
+    m = length(M)
+    σ = Array{Int}(undef, (n, m))
     for j in 1:n
-        for (h, op) in enumerate(jobs[j].ops)
-            σ[j, h] = op.machine
+        avail = ones(Bool, m)
+        ops = jobs[j].ops
+        n_ops = length(ops)
+        for h = 1:m
+            i = if h <= n_ops 
+                ops[h].machine 
+            else 
+                findfirst(avail)
+            end
+            avail[i] = false
+            σ[j, h] = i
         end
     end
     return σ
@@ -70,7 +81,7 @@ function processing_time(jobs::Vector{Job})
     return p
 end
 
-# Now we can start building the model that matches the canonical form.
+# Now we can start building the model that matches the standard form.
 
 ## Declare the algo type
 struct ManneMIPAlg <: SolveAlg
@@ -137,7 +148,7 @@ function build_model(alg::ManneMIPAlg, jobs::Vector{Job})
     ## (3) Precedence constraint. It ensures that all operations of a job are executed 
     ## in the given order.
     @constraint(model,
-        [j ∈ J, h = 2:m],       # ∀ j ∈ J, h = 2,...,m
+        [j ∈ J, h = 2:m; p[σ[j, h-1], j] > 0],       # ∀ j ∈ J, h = 2,...,m
         x[σ[j, h], j]           # start time of i=(ℎ-th op) of job 𝑗
         ≥
         x[σ[j, h-1], j] +       # start time of antecedent op
@@ -147,11 +158,11 @@ function build_model(alg::ManneMIPAlg, jobs::Vector{Job})
     ## Disjunctive constraints (4) and (5) to ensure that no two jobs can be scheduled on 
     ## the same machine at the same time.
     @constraint(model,
-        [i ∈ M, j ∈ J, k ∈ J; j < k],
+        [i ∈ M, j ∈ J, k ∈ J; j < k && p[i, k] > 0],
         x[i, j] ≥ x[i, k] + p[i, k] - V * z[i, j, k]
     )
     @constraint(model,
-        [i ∈ M, j ∈ J, k ∈ J; j < k],
+        [i ∈ M, j ∈ J, k ∈ J; j < k && p[i, j] > 0],
         x[i, k] ≥ x[i, j] + p[i, j] - V * (1 - z[i, j, k])
     )
 

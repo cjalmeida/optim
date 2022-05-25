@@ -8,6 +8,7 @@ include(joinpath(pwd(), "utils.jl")) #hide
 include_code("jssp/data.jl")
 include_code("jssp/jump.jl")
 include_code("jssp/problem_gen.jl")
+include_code("jssp/solvers.jl")
 
 using Random
 
@@ -59,8 +60,6 @@ run_benchmark1()
 # have access to a Gurobi license so I'll also try it. Note that the code for HiGHS, 
 # another open-source solver, the is commented out as it was much slower (~19s) compared 
 # to other solvers.
-
-include_code("jssp/solvers.jl")
 
 function run_benchmark2()
     ort_jobs = get_problem(:ortools_example)

@@ -6,14 +6,14 @@ In the [previous post](/posts/jssp1/) we introduced the job shop scheduling prob
 
 ## Crash-course on Mixed Integer Linear Programming
 
-Let's start with the _linear programming_ part. It's a technique that aims to minimize (or maximize) a **linear function**, subject to **constraints** presented as linear inequalities. The act of "modeling" a problem so it can be solvable via linear programming means turning it into a _canonical form_ similar to the example below:
+Let's start with the _linear programming_ part. It's a technique that aims to minimize (or maximize) a **linear function**, subject to **constraints** presented as linear inequalities. The act of "modeling" a problem so it can be solvable via linear programming means turning it into a _standard form_ similar to the example below:
 
 @@quote
 A manufacturing plant have products **x** and **y**. The respective prices are **40** and **30**. The total manufacturing capacity is **12** tons combined. Product _x_ consumes **2** times the amount of raw resources compared to _y_, and we have **16** tons of such resources. We need to find the amount of _x_ and _y_ to produce that **maximize**
 revenues.
 @@
 
-The problem above can be formulated in canonical form as:
+The problem above can be formulated in standard form as:
 
 $$
 \begin{aligned}
@@ -31,7 +31,7 @@ And the optimal solution to the above is $(x=4; y=5)$. Assuming the variables $x
 
 Integer solutions are arguably a more limited domain than real solution. The fact it's harder to find integer solutions seems unintuitive. But in fact, we have many techniques to optimize continuous functions, many of them from _calculus_. And in particular when the solution space is [convex]. Integer problems are neither continuous or convex, but the algorithms for solving them can leverage information gained by **relaxing** the integer requirement.
 
-Once we model the problem in the canonical form, we can use a number of [commercial and open-source solvers][solvers] instead of writing the algorithms ourselves. Those implement a algorithms to reduce the search space and can still find solution to MILPs in a reasonable amount of time for some practical applications.
+Once we model the problem in the standard form, we can use a number of [commercial and open-source solvers][solvers] instead of writing the algorithms ourselves. Those implement a algorithms to reduce the search space and can still find solution to MILPs in a reasonable amount of time for some practical applications.
 
 In this section we barely scratched the surface of (integer) linear programming. For those interested in digging deeper, [Prof. Pascal Van Hentenryck][pascal] gives a highly recommended [Coursera online course][coursera]. For BCG GAMMA employees, check our internal _Learning and Development_ offerings as frequently we have presential or online courses taught by Prof. Pascal himself.
 
@@ -136,7 +136,7 @@ julia> 3 ∈ [1,2]
 false
 ```
 
-Arguably, judicial use of such symbols make it easier to write math-inspired code since, lowering the communication barrier between _coders_ and _scientists_. JuMP follows this philosophy by making formulating constraint in canonical form straightforward. For instance check the similarities between the canonical formulation of the "precedence constraint" (3):
+Arguably, judicial use of such symbols make it easier to write math-inspired code since, lowering the communication barrier between _coders_ and _scientists_. JuMP follows this philosophy by making formulating constraint in standard form straightforward. For instance check the similarities between the standard formulation of the "precedence constraint" (3):
 
 $$
 x_{\sigma^{j}_h,j} \ge x_{\sigma^{j}_{h-1},j} + p_{\sigma^{j}_{h-1},j}

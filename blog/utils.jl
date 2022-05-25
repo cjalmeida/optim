@@ -1,6 +1,7 @@
 using Query
 using Franklin
 using Dates
+using Markdown
 
 function include_code(fname)
   include(joinpath(pwd(), "code", fname))

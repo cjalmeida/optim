@@ -43,3 +43,5 @@ function plot(plan::Plan)
     )
     return fig
 end
+
+plot(plan, out::String) = save(out, plot(plan); px_per_unit=2) # hide
