@@ -2,6 +2,7 @@
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 Cbc = "9961bab8-2fa3-5c5a-9d89-47fab24efd76"
+CodecZstd = "6b39b394-51ab-5f42-8807-6242bab2b4c2"
 ConfigEnv = "01234589-554d-41b7-ae5c-7b6ee2db6796"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"

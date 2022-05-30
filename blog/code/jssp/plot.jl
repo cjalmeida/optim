@@ -17,7 +17,8 @@ function plot(plan::Plan)
         fig[1, 1],
         ylabel="Machine",
         xlabel="Time",
-        yticks=LinearTicks(num_machines(plan))
+        yticks=1:num_machines(plan),
+        xticks=0:makespan(plan)
     )
 
     ## Let's add a barplot showing the machine assignments. The `(x, y)` axis seem 
@@ -37,7 +38,7 @@ function plot(plan::Plan)
     text!(
         labels,
         position=positions,
-        textsize=11,
+        textsize=9,
         color="#ffffff",
         align=(:left, :center)
     )

@@ -25,24 +25,17 @@ function run_benchmark1()
     plan = @time solve(alg, jobs)
     @assert makespan(plan) == 11
 
-    println("\nA random 3j x 3m problem")
+    println("\nA random 5j x 4m problem")
     alg = ManneMIPAlg()
-    spec = JSSProblemSpec(3, 3, 0:5, seed)
+    spec = JSSProblemSpec(5, 4, 0:5, seed)
     jobs = get_problem(spec)
-    @time solve(alg, jobs)
+    plan = @time solve(alg, jobs)
 
-
-    println("\nA random 50j x 5m problem")
+    println("\nA random 8j x 5m problem")
     alg = ManneMIPAlg()
-    spec = JSSProblemSpec(50, 5, 0:5, seed)
+    spec = JSSProblemSpec(8, 5, 0:5, seed)
     jobs = get_problem(spec)
-    @time solve(alg, jobs)
-
-    println("\nA random 100j x 10m problem")
-    alg = ManneMIPAlg()
-    spec = JSSProblemSpec(100, 10, 0:5, seed)
-    jobs = get_problem(spec)
-    @time solve(alg, jobs)
+    plan = @time solve(alg, jobs)
 
     println("\nBenchmark done!")
 end
@@ -54,34 +47,32 @@ run_benchmark1()
 \output{./code/bench1}
 """
 
-# We can see that the last `100j x 10m` problem took way more time than our `50j x 5m`
-# instance despite being only 4x bigger! Let's try solving the same instance using 
+# We can see that the last `8j x 5m` problem did not finished in the alloted time (15s)
+# despite being only 2x "bigger" then the `5j x 4m` instance! Let's try solving the same instance using 
 # different solvers. We'll use SCIP, a solver that's free for non-commercial uses. I 
-# have access to a Gurobi license so I'll also try it. Note that the code for HiGHS, 
-# another open-source solver, the is commented out as it was much slower (~19s) compared 
-# to other solvers.
+# have access to a Gurobi license so I'll also try it.
 
 function run_benchmark2()
     ort_jobs = get_problem(:ortools_example)
-    spec = JSSProblemSpec(100, 10, 0:5, seed)
+    size = "8j x 5m"
+    spec = JSSProblemSpec(8, 5, 0:5, seed)
     jobs = get_problem(spec)
 
-    println("\nA random 100j x 10m problem using SCIP")
+    println("\nA random $size problem using SCIP")
     alg = ManneMIPAlg(:scip)
     solve(alg, ort_jobs) # warmup
-    @time solve(alg, jobs)
-    
-    ### Commenting out HiGHS as it's very bad at this problem instance.
-    ## println("\nA random 100j x 10m problem using HiGHS")
-    ## alg = ManneMIPAlg(:highs)
-    ## solve(alg, ort_jobs) # warmup
-    ## @time solve(alg, jobs)
+    plan = @time solve(alg, jobs)
+
+    println("\nA random $size problem using HiGHS")
+    alg = ManneMIPAlg(:highs)
+    solve(alg, ort_jobs) # warmup
+    plan = @time solve(alg, jobs)
 
     try
-        println("\nA random 100j x 10m problem using Gurobi")
+        println("\nA random $size problem using Gurobi")
         alg = ManneMIPAlg(:gurobi)
         solve(alg, ort_jobs) # warmup
-        @time solve(alg, jobs)
+        plan = @time solve(alg, jobs)
     catch e
         @show e
         println("Could not run benchmark on Gurobi")

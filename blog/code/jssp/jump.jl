@@ -112,9 +112,10 @@ See:
 """
 function build_model(alg::ManneMIPAlg, jobs::Vector{Job})
 
-    ## Create a new Cbc model suppressing logs
+    ## Create a new model
     solver = get_solver(alg)
     model = Model(solver)
+    set_time_limit_sec(model, 15.0)
 
     #####################
     ## Problem parameters
@@ -148,7 +149,7 @@ function build_model(alg::ManneMIPAlg, jobs::Vector{Job})
     ## (3) Precedence constraint. It ensures that all operations of a job are executed 
     ## in the given order.
     @constraint(model,
-        [j ∈ J, h = 2:m; p[σ[j, h-1], j] > 0],       # ∀ j ∈ J, h = 2,...,m
+        c3[j ∈ J, h = 2:m; p[σ[j, h-1], j] > 0],       # ∀ j ∈ J, h = 2,...,m
         x[σ[j, h], j]           # start time of i=(ℎ-th op) of job 𝑗
         ≥
         x[σ[j, h-1], j] +       # start time of antecedent op
@@ -158,19 +159,19 @@ function build_model(alg::ManneMIPAlg, jobs::Vector{Job})
     ## Disjunctive constraints (4) and (5) to ensure that no two jobs can be scheduled on 
     ## the same machine at the same time.
     @constraint(model,
-        [i ∈ M, j ∈ J, k ∈ J; j < k && p[i, k] > 0],
+        c4[i ∈ M, j ∈ J, k ∈ J; j < k && p[i, k] > 0],
         x[i, j] ≥ x[i, k] + p[i, k] - V * z[i, j, k]
     )
     @constraint(model,
-        [i ∈ M, j ∈ J, k ∈ J; j < k && p[i, j] > 0],
+        c5[i ∈ M, j ∈ J, k ∈ J; j < k && p[i, j] > 0],
         x[i, k] ≥ x[i, j] + p[i, j] - V * (1 - z[i, j, k])
     )
 
     ## (6) to ensures that the makespan is at least the largest completion time of the last
     ## operation of all jobs
     @constraint(model,
-        [j ∈ J],
-        C ≥ x[σ[j, m], j] + p[σ[j, m]]
+        c6[j ∈ J],
+        C ≥ x[σ[j, m], j] + p[σ[j, m], j]
     )
 
     return model, x, m, n, p
@@ -190,7 +191,11 @@ function solve(alg::ManneMIPAlg, jobs::Vector{Job})
     ## optimize to find minimum start times
     optimize!(model)
 
-    if termination_status(model) != OPTIMAL
+    term = termination_status(model)
+    if term != OPTIMAL
+        stat = raw_status(model)
+        println("WARN: Solver finished with status $(term)")
+        println("WARN: Message from solver $(stat)")
         return nothing
     end
 
